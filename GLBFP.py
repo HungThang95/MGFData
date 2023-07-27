@@ -64,10 +64,12 @@ else:
         maxx = Ranh.bounds.maxx[0]
         maxy = Ranh.bounds.maxy[0]
 
-        Ranhbuffer = gpd.GeoDataFrame(geometry = Ranh.geometry.buffer(0.001),crs="EPSG:4326")
+        buffer = gpd.GeoSeries([Ranh.loc[0].geometry]).buffer(0.001)
+        Ranhbuffer = gpd.GeoDataFrame(geometry = buffer,crs="EPSG:4326")
+        
         st.write("Boundary coordinates:", minx, miny, maxx, maxy)  
+        st.write("Boundary :", Ranhbuffer)
 
-    
         if col2.button ("Get data"):
             quad_keys = set()
             
