@@ -74,7 +74,7 @@ else:
             for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
                 quad_keys.add(int(mercantile.quadkey(tile)))
             quad_keys = list(quad_keys)
-            dataset_links = pd.read_csv("https://minedbuildings.blob.core.windows.net/global-buildings/dataset-links.csv")
+            dataset_links = pd.read_csv("https://raw.githubusercontent.com/HungThang95/MGFData/main/dataset-links.csv")
             links = dataset_links[dataset_links.QuadKey.isin (quad_keys)]
 
             geotemp = []
