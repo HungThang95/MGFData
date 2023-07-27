@@ -1,0 +1,6 @@
+fiona==1.9.4.post1
+geopandas==0.13.2
+mercantile==1.2.1
+pandas==1.4.3
+Shapely==2.0.1
+streamlit==1.11.1
