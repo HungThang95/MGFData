@@ -38,7 +38,7 @@ Main = st.container()
 
 col1, col2 = st.columns((5,5))
 
-Main.header("GET FOOTPRINT GLOBAL DATA FORM MICROSOFT OPEN SOURCE")
+Main.header("GET FOOTPRINT GLOBAL DATA FROM MICROSOFT OPEN SOURCE")
 
 if len (prmsContainer) != 0:
     Files = prmsContainer['file'][0]
