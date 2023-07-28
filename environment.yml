@@ -1,0 +1,10 @@
+channles:
+  - conda-forge
+dependencies:
+  - Fiona==1.8.13.post1
+  - geopandas==0.9.0
+  - mercantile==1.2.1
+  - numpy==1.22.3
+  - pandas==1.4.3
+  - Shapely==1.7.1
+  - streamlit==1.24.1
