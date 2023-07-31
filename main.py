@@ -77,36 +77,19 @@ else:
         st.write("Boundary coordinates:", minx, miny, maxx, maxy)  
         st.write("Boundary :", Ranhbuffer)
     
-        if col2.button ("Get data"):
+        if col2.button ("Collect Data"):
             quad_keys = set()
             
             for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
                 quad_keys.add(int(mercantile.quadkey(tile)))
             quad_keys = list(quad_keys)
             dataset_links = pd.read_csv("https://raw.githubusercontent.com/HungThang95/MGFData/main/dataset-links.csv")
-            links = dataset_links[dataset_links.QuadKey.isin (quad_keys)]
-
-            geotemp = []
-            for _, row in links.iterrows():
-                df = pd.read_json(row.Url, lines=True)
-                df['geometry'] = df['geometry'].apply(shape)
-                gdf = gpd.GeoDataFrame(df, crs=4326)
-                gdf1 = gpd.overlay(gdf,Ranhbuffer,how='intersection')
+            dataset_link_VN = dataset_links[dataset_links.Location == "Vietnam"]
+            links = dataset_link_VN[dataset_links.QuadKey.isin (quad_keys)]
+             if col2.button ("Get data"):
+                  df = pd.read_json("https://minedbuildings.blob.core.windows.net/global-buildings/2023-06-06/global-buildings.geojsonl/RegionName%3DVietnam/quadkey%3D132213211/part-00164-e6b13dc0-a501-4630-bc51-aa2e3483e114.c000.csv.gz", lines=True)
+                  df['geometry'] = df['geometry'].apply(shape)
+                  gdf = gpd.GeoDataFrame(df, crs=4326)
+                  gdf2 = gpd.overlay(gdf,Ranh,how='intersection')
+                  st.write("finish")
                 
-                for i in range(0,len(gdf1.geometry)):
-                    newrow = gpd.GeoSeries([gdf1.loc[i].geometry])
-                    if newrow.within(Ranh.geometry).values[0] == True:
-                        geotemp.append(newrow.values[0])
-                        
-            CT = gpd.GeoDataFrame(geometry=geotemp, crs="EPSG:4326")
-            col2.write(len(CT.geometry))
-            col2.success('Success!!', icon="✅")
-            with tempfile.TemporaryDirectory() as tmp:
-                save_shapefile_with_bytesio(CT,tmp)
-                with open(f"{tmp}/Footprint.zip", "rb") as file:
-                    col2.download_button(
-                        label="Download data",
-                        data=file,
-                        file_name='Footprint.zip',
-                        mime='application/zip',
-                    )
