@@ -39,6 +39,24 @@ def save_shapefile_with_bytesio(dataframe,directory):
     zipObj.write(f"{directory}/Footprint.shx",arcname = 'Footprint.shx')
     zipObj.close()
     
+@st.cache_data
+def readjs(url):
+    df = pd.read_json(url, lines=True)
+    df['geometry'] = df['geometry'].apply(shape)
+    gdf = gpd.GeoDataFrame(df, crs=4326)
+    # gdf1 = gpd.overlay(gdf,R,how='intersection')
+    return gdf
+
+@st.cache_data
+def quad_key(minx, miny, maxx, maxy):
+    quad_keys = set()
+    for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
+        quad_keys.add(int(mercantile.quadkey(tile)))
+    quad_keys = list(quad_keys)
+    dataset_links = pd.read_csv("https://raw.githubusercontent.com/HungThang95/MGFData/main/dataset-links.csv")
+    dataset_link_VN = dataset_links[dataset_links.Location == "Vietnam"]
+    links = dataset_link_VN[dataset_links.QuadKey.isin (quad_keys)]
+    return links
     
 Main = st.container()
 
@@ -63,33 +81,18 @@ else:
         else: geoFileName =  Files    
         geoFile = f"{tmp1}/{geoFileName}"
         
+        
         Ranh =  gpd.read_file(geoFile)
 
         minx = Ranh.bounds.minx[0]
         miny = Ranh.bounds.miny[0]
         maxx = Ranh.bounds.maxx[0]
         maxy = Ranh.bounds.maxy[0]
-        
-        
-        buffer = gpd.GeoSeries([Ranh.loc[0].geometry]).buffer(0.001)
-        Ranhbuffer = gpd.GeoDataFrame(geometry = buffer,crs="EPSG:4326")
-        
         st.write("Boundary coordinates:", minx, miny, maxx, maxy)  
-        st.write("Boundary :", Ranhbuffer)
-    
-        if col2.button ("Collect Data"):
-            quad_keys = set()
-            
-            for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
-                quad_keys.add(int(mercantile.quadkey(tile)))
-            quad_keys = list(quad_keys)
-            dataset_links = pd.read_csv("https://raw.githubusercontent.com/HungThang95/MGFData/main/dataset-links.csv")
-            dataset_link_VN = dataset_links[dataset_links.Location == "Vietnam"]
-            links = dataset_link_VN[dataset_links.QuadKey.isin (quad_keys)]
-             if col2.button ("Get data"):
-                  df = pd.read_json("https://minedbuildings.blob.core.windows.net/global-buildings/2023-06-06/global-buildings.geojsonl/RegionName%3DVietnam/quadkey%3D132213211/part-00164-e6b13dc0-a501-4630-bc51-aa2e3483e114.c000.csv.gz", lines=True)
-                  df['geometry'] = df['geometry'].apply(shape)
-                  gdf = gpd.GeoDataFrame(df, crs=4326)
-                  gdf2 = gpd.overlay(gdf,Ranh,how='intersection')
-                  st.write("finish")
-                
+        st.write("Boundary :", Ranh)
+        
+        links = quad_key(minx, miny, maxx, maxy)
+        st.write(links.Url.values[0])
+        if col2.button("Get Data"):
+            js = readjs(links.Url.values[0])
+            st.write(len(js.geometry))
